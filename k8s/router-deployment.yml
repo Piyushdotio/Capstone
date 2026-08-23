@@ -16,6 +16,7 @@ spec:
     spec:
       containers:
       - image: router:v1
+        imagePullPolicy: IfNotPresent
         name:  router-server
         resources:
           requests:
@@ -28,14 +29,16 @@ spec:
           httpGet:
             path: /api/status/healthz
             port: 3000
-          initialDelaySeconds: 90
-          timeoutSeconds: 10
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 5
         readinessProbe:
           httpGet:
             path: /api/status/readyz
             port: 3000
-          initialDelaySeconds: 30
-          timeoutSeconds: 10
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          timeoutSeconds: 5
         ports:
         - containerPort:  3000
           name:  router-server

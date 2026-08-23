@@ -71,15 +71,17 @@ app.get("/read-files", async (req, res) => {
     const fileList = files.split(",")
 
     const results = await Promise.all(fileList.map(async (file) => {
-        const filePath = path.join(WORKING_DIR, file)
+        const relativeFile = file.startsWith(WORKING_DIR) ? file.slice(WORKING_DIR.length) : file;
+        const filePath = path.join(WORKING_DIR, relativeFile)
+        const displayPath = path.relative(WORKING_DIR, filePath)
         try {
             const content = await fs.promises.readFile(filePath, "utf-8")
             return {
-                [filePath]: content,
+                [displayPath]: content,
             }
         } catch (error) {
             return {
-                [filePath]: `Error reading file : ${error}`,
+                [displayPath]: `Error reading file : ${error}`,
             }
         }
     }))
@@ -126,10 +128,12 @@ app.patch("/update-files", async (req, res) => {
             if (typeof file !== 'string') {
                 throw new Error("File path must be a string");
             }
-            const filePath = path.join(WORKING_DIR, file)
+            const relativeFile = file.startsWith(WORKING_DIR) ? file.slice(WORKING_DIR.length) : file;
+            const filePath = path.join(WORKING_DIR, relativeFile)
             await fs.promises.writeFile(filePath, content || "", "utf-8")
+            const displayPath = path.relative(WORKING_DIR, filePath)
             return {
-                [filePath]: "updated",
+                [displayPath]: "updated",
             }
         } catch (error) {
             return {
@@ -168,7 +172,9 @@ app.post("/create-files", async (req, res) => {
     }
     const results = await Promise.all(files.map(async (fileObj) => {
         const { file, content } = fileObj
-        const filePath = path.join(WORKING_DIR, file)
+        const relativeFile = file.startsWith(WORKING_DIR) ? file.slice(WORKING_DIR.length) : file;
+        const filePath = path.join(WORKING_DIR, relativeFile)
+        const displayPath = path.relative(WORKING_DIR, filePath)
         try {
             await fs.promises.mkdir(
                 path.dirname(filePath),
@@ -176,11 +182,11 @@ app.post("/create-files", async (req, res) => {
             );
             await fs.promises.writeFile(filePath, content, "utf-8")
             return {
-                [filePath]: "file created successfully",
+                [displayPath]: "file created successfully",
             }
         } catch (error) {
             return {
-                [filePath]: `Error creating file : ${error}`,
+                [displayPath]: `Error creating file : ${error}`,
             }
         }
     }))
