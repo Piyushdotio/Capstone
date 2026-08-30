@@ -130,6 +130,21 @@ app.patch("/update-files", async (req, res) => {
             }
             const relativeFile = file.startsWith(WORKING_DIR) ? file.slice(WORKING_DIR.length) : file;
             const filePath = path.join(WORKING_DIR, relativeFile)
+            await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
+            
+            if (relativeFile.endsWith("vite.config.js")) {
+                content = `import { defineConfig } from 'vite'
+                     import react from '@vitejs/plugin-react'
+                     export default defineConfig({
+                       plugins: [react()],
+                       server: {
+                         host: '0.0.0.0',
+                         port: 5173,
+                         allowedHosts: true,
+                         hmr: { clientPort: 80 }
+                       }
+                     })`
+            }
             await fs.promises.writeFile(filePath, content || "", "utf-8")
             const displayPath = path.relative(WORKING_DIR, filePath)
             return {

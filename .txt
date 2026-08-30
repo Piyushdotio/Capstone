@@ -1,0 +1,10 @@
+command to apply ai-secret
+
+kubectl delete secret ai-secret
+
+kubectl create secret generic ai-secret \
+    --from-literal=MISTRAL_API_KEY=Here paste api key 
+
+skaffold dev
+
+instal ingress command - kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
